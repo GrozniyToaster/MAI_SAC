@@ -1,0 +1,100 @@
+\documentclass{article}
+
+
+\usepackage[utf8]{inputenc}
+\usepackage[T2B]{fontenc}
+\usepackage[english,russian]{babel}
+
+\title{\textbf{ЛР 2}} \author{Недосеков Иван 206}
+
+\usepackage{sagetex}
+\setlength{\sagetexindent}{10ex}
+
+\usepackage{geometry}
+\geometry{a4paper, total={170mm,257mm}, left=20mm, right=20mm, top=20mm, bottom=20mm}
+
+\usepackage{xcolor}
+\usepackage{titlesec}
+
+\definecolor{myred1}{RGB}{107, 14, 14}
+\definecolor{mygreen1}{RGB}{0, 102, 0}
+
+\begin{document}
+
+\maketitle
+\titleformat{\section}[block]{\color{red}\Large\bfseries\filcenter}{}{1em}{}
+
+\section{3. Упростить уравнение поверхности второго порядка в простраснтвe}
+
+\textbf{Вариант 17:}
+\begin{sageblock}
+var('x y z')
+f(x, y, z) = 8*x^2 - 2*x*y - 4*y^2 + 2*x*z - 2*y*z + 3*z^2 + 7*x + 8*y + 9*z - 10
+\end{sageblock}
+$f(x, y, z) = \sage{f(x, y, z)}$\\
+\textbf{Составим матрицу A, столбец а и свободный член а0} 
+\begin{sageblock}
+A = matrix([
+            ( 8, -1,   1),
+            (-1, -4,  -1), 
+            ( 1, -1,   3) 
+           ])
+a = matrix([
+            [7],
+            [8],
+            [9]
+            ])
+a0 = -10
+\end{sageblock}
+
+\textbf{Константы для отрисовки и работы} 
+\begin{sageblock}
+xmin, xmax = -50, 50
+ymin, ymax = -50, 50
+zmin, zmax = -50, 50
+\end{sageblock}
+\textbf{График заданной поверхности}
+\begin{sageblock}
+p = implicit_plot3d(f(x=x,y=y,z=z),(x, xmin, xmax), (y, ymin, ymax), (z, zmin, zmax))
+\end{sageblock}
+\begin{center}
+\sageplot{p}
+\end{center}
+\textbf{Находим собственные векторы и формируем из них матрицу перехода.}
+\begin{sageblock}
+def norm(v):
+    n = 0
+    for i in range(3):
+        n += v[i]*v[i]
+    n = sqrt(n)
+    for i in range(3):
+        v[i] /= n
+    return v
+
+ev = A.eigenvalues()
+vectors = A.eigenvectors_right()
+v1 = norm(vectors[0][1][0])
+v2 = norm(vectors[1][1][0])
+v3 = norm(vectors[2][1][0])
+
+ST = identity_matrix(RR, 3)
+norm_vectors = [v1, v2, v3]
+for i in range(3):
+    for j in range(3):
+        ST[i,j] = norm_vectors[i][j]
+
+a_ = ST * a
+\end{sageblock}
+
+\textbf{Составляем поверхность в новом виде}
+\begin{sageblock}
+u(x, y, z) = *(a_[0]*x + a_[1]*y + a_[2]*z) # освобождаем от кортежа
+kf(x, y, z) = ev[0]*x^2 + ev[1]*y^2 + ev[2]*z^2 + u + a0
+p = implicit_plot3d(kf(x=x, y=y, z=z), (x, xmin, xmax), (y, ymin, ymax), (z, zmin, zmax))
+\end{sageblock}
+\begin{center}
+\sageplot{p}
+\end{center}
+
+
+\end{document}
